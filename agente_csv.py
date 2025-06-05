@@ -1,34 +1,39 @@
-# agente_csv.py
 import os
 import zipfile
 
-def descompactar_arquivo(nome_zip, pasta_base="dados"):
+def descompactar_arquivo(nome_arquivo_zip, pasta_raiz="dados"):
     """
-    Descompacta o arquivo ZIP informado dentro da pasta 'dados/descompactado/{nome_zip_sem_extensao}'.
+    Recebe o nome de um arquivo ZIP e descompacta na pasta:
+    dados/descompactado/NOME_DO_ARQUIVO_SEM_ZIP
     """
-    caminho_zip = os.path.join(pasta_base, nome_zip)
 
-    if not os.path.exists(caminho_zip):
-        print(f"❌ Arquivo ZIP '{nome_zip}' não encontrado em '{pasta_base}/'.")
+    # Caminho completo até o ZIP: dados/202401_NFs.zip
+    caminho_completo_zip = os.path.join(pasta_raiz, nome_arquivo_zip)
+
+    # Verifica se o arquivo realmente existe
+    if not os.path.exists(caminho_completo_zip):
+        print(f"❌ Arquivo '{nome_arquivo_zip}' não encontrado dentro de '{pasta_raiz}/'")
         return None
 
-    nome_pasta_saida = os.path.splitext(nome_zip)[0]
-    pasta_saida = os.path.join(pasta_base, "descompactado", nome_pasta_saida)
+    # Separa o nome do arquivo da extensão .zip
+    nome_base_sem_extensao = os.path.splitext(nome_arquivo_zip)[0]  # Exemplo: "202401_NFs"
 
-    os.makedirs(pasta_saida, exist_ok=True)
+    # Define a pasta final de saída, ex: dados/descompactado/202401_NFs
+    pasta_destino = os.path.join(pasta_raiz, "descompactado", nome_base_sem_extensao)
 
-    with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
-        zip_ref.extractall(pasta_saida)
+    # Cria essa pasta caso ainda não exista
+    os.makedirs(pasta_destino, exist_ok=True)
 
-    arquivos_extraidos = os.listdir(pasta_saida)
+    # Descompacta o arquivo na pasta definida
+    with zipfile.ZipFile(caminho_completo_zip, 'r') as zip_ref:
+        zip_ref.extractall(pasta_destino)
 
-    print(f"✅ Arquivo '{nome_zip}' descompactado com sucesso!")
-    print(f"📂 Arquivos extraídos em '{pasta_saida}':")
-    for arquivo in arquivos_extraidos:
-        print("   └──", arquivo)
+    # Lista os arquivos que foram extraídos
+    arquivos_extraidos = os.listdir(pasta_destino)
 
-    return pasta_saida  # importante para próximos passos
+    print(f"✅ Arquivo '{nome_arquivo_zip}' descompactado com sucesso!")
+    print(f"📂 Arquivos extraídos em '{pasta_destino}':")
+    for nome_arquivo in arquivos_extraidos:
+        print("   └──", nome_arquivo)
 
-# Execução direta (para testes manuais)
-if __name__ == "__main__":
-    descompactar_arquivo("202401_NFs.zip")
+    return pasta_destino
