@@ -1,128 +1,156 @@
-Passo a passo detalhado do projeto agente_csv_i2a2
+# Passo a passo detalhado do projeto agente_csv_i2a2
 
 Este documento apresenta uma descrição completa, explicada passo a passo, de tudo que foi realizado até o momento no projeto do Desafio 2 - I2A2, com o agente inteligente interpretando dados em CSV.
 
-1. Criação da pasta do projeto
+---
 
-No terminal:
+## 📁 Criação da pasta do projeto
 
+```bash
 mkdir agente_csv_i2a2
 cd agente_csv_i2a2
+```
 
-Criamos uma pasta exclusiva para o projeto e entramos nela.
+---
 
-2. Inicialização do Git
+## 🔄 Inicialização do Git
 
+```bash
 git init
-
-Prepara o repositório local para versionamento com Git.
-
-Se ainda não tiver repositório remoto:
-
 git remote add origin https://github.com/Rodrigo-RRC/agente_csv_i2a2.git
+```
 
-3. Criação do .gitignore
+---
 
+## 📂 Criação do .gitignore
+
+```bash
 type nul > .gitignore
 notepad .gitignore
+```
 
-Adicionamos ao .gitignore:
+Conteúdo do `.gitignore`:
 
+```
 .env
 venv/
 __pycache__/
+```
 
-Esses arquivos e pastas não devem ir para o GitHub.
+---
 
-4. Criação do ambiente virtual
+## 🐍 Criação do ambiente virtual
 
+```bash
 python -m venv venv
 venv\Scripts\activate
+```
 
-Criação e ativação de ambiente virtual exclusivo do projeto.
+---
 
-5. Instalação das bibliotecas
+## 📦 Instalação das bibliotecas
 
+```bash
 pip install langchain langchain-community openai python-dotenv
+```
 
-Instalação das dependências essenciais:
+---
 
-langchain: motor para criar agentes inteligentes
+## 🔐 Criação do arquivo .env
 
-langchain-community: integrações com modelos (OpenAI, etc.)
-
-openai: acesso à API da OpenAI
-
-python-dotenv: carrega a chave da API de forma segura
-
-6. Criação do arquivo .env
-
+```bash
 type nul > .env
 notepad .env
+```
 
 Conteúdo do arquivo:
 
+```
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
-Serve para proteger sua chave de API.
+---
 
-7. Criação do main.py
+## 🧠 Criação do main.py
 
+```bash
 type nul > main.py
 notepad main.py
+```
 
-Conteúdo atualizado do main.py:
+Conteúdo atualizado do `main.py`:
 
+```python
 from langchain_community.chat_models import ChatOpenAI
-from langchain_core.messages import HumanMessage
+from langchain.schema import HumanMessage
 from dotenv import load_dotenv
 import os
 
-# Carrega variáveis do arquivo .env
+from agente_inteligente.ler_csv import ler_csvs_notas
+
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-# Inicializa o modelo da OpenAI
-llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=api_key, temperature=0.3)
+df_cabecalho, df_itens = ler_csvs_notas()
 
-# Define a pergunta do usuário
-mensagem = HumanMessage(content="O que é uma nota fiscal?")
+print("\n📄 Amostra do cabeçalho das notas fiscais:")
+print(df_cabecalho.head())
 
-# Envia para o modelo e imprime resposta
+print("\n📦 Amostra dos itens das notas fiscais:")
+print(df_itens.head())
+
+pergunta = f"Quantas notas fiscais foram emitidas no total neste conjunto de dados? O arquivo contém {len(df_cabecalho)} registros."
+
+llm = ChatOpenAI(
+    model_name="gpt-3.5-turbo",
+    openai_api_key=api_key,
+    temperature=0.3
+)
+
+mensagem = HumanMessage(content=pergunta)
 resposta = llm.invoke([mensagem])
+
 print("\n💬 Resposta do agente:")
 print(resposta.content)
+```
 
-8. Commit e push para o GitHub
+---
 
+## 💾 Commit inicial
+
+```bash
 git add .
 git commit -m "Criação inicial com ambiente, .env e main.py"
 git push origin main
+```
 
-Atualizamos o repositório com todas as configurações iniciais.
+---
 
-9. Criação da pasta dados e upload do .zip
+## 📦 Criação da pasta `dados` e upload do .zip
 
+```bash
 mkdir dados
 type nul > dados\.gitkeep
-# upload manual do arquivo 202401_NFs.zip para a pasta dados/
+```
 
-O arquivo .gitkeep foi criado para versionar a pasta vazia no Git.
+Upload manual do arquivo `202401_NFs.zip` para a pasta `dados/`.
 
-10. Criação do agente_csv.py para descompactar o .zip
+---
 
+## 📂 Criação do `agente_csv.py` para descompactar o .zip
+
+```bash
 type nul > agente_csv.py
 notepad agente_csv.py
+```
 
-Conteúdo atualizado do agente_csv.py:
+Conteúdo:
 
+```python
 import os
 import zipfile
 
 def descompactar_arquivo(nome_zip, pasta_base="dados"):
-    """
-    Descompacta o arquivo ZIP informado dentro da pasta 'dados/descompactado/{nome_zip_sem_extensao}'.
-    """
     caminho_zip = os.path.join(pasta_base, nome_zip)
 
     if not os.path.exists(caminho_zip):
@@ -144,26 +172,76 @@ def descompactar_arquivo(nome_zip, pasta_base="dados"):
     for arquivo in arquivos_extraidos:
         print("   └──", arquivo)
 
-    return pasta_saida  # importante para próximos passos
+    return pasta_saida
 
-# Execução direta (para testes manuais)
 if __name__ == "__main__":
     descompactar_arquivo("202401_NFs.zip")
+```
 
-11. Execução do agente descompactador
+Execução para testes:
 
+```bash
 python agente_csv.py
+```
 
-Resultado esperado:
+---
 
-✅ Arquivo '202401_NFs.zip' descompactado com sucesso!
-📂 Arquivos extraídos em 'dados\\descompactado\\202401_NFs':
-   └── 202401_NFs_Cabecalho.csv
-   └── 202401_NFs_Itens.csv
+## ✅ Commit do descompactador
 
-12. Commit do agente_csv.py
-
+```bash
 git add agente_csv.py
 git commit -m "Função descompactar_arquivo modularizada com retorno do caminho da pasta extraída"
 git push origin main
+```
 
+---
+
+## 📁 Criação da pasta `agente_inteligente` e reorganização dos arquivos
+
+```bash
+mkdir agente_inteligente
+type nul > agente_inteligente\__init__.py
+move agente_csv.py agente_inteligente\
+move ler_csv.py agente_inteligente\
+```
+
+---
+
+## 📄 Criação do `ler_csv.py`
+
+```bash
+type nul > agente_inteligente\ler_csv.py
+notepad agente_inteligente\ler_csv.py
+```
+
+Conteúdo:
+
+```python
+import pandas as pd
+import os
+
+def ler_csvs_notas(caminho_base="dados/descompactado"):
+    try:
+        caminho_cabecalho = os.path.join(caminho_base, "202401_NFs_Cabecalho.csv")
+        caminho_itens = os.path.join(caminho_base, "202401_NFs_Itens.csv")
+
+        df_cabecalho = pd.read_csv(caminho_cabecalho, sep=';', encoding='utf-8')
+        df_itens = pd.read_csv(caminho_itens, sep=';', encoding='utf-8')
+
+        print("✅ Arquivos CSV lidos com sucesso.")
+        return df_cabecalho, df_itens
+
+    except Exception as e:
+        print(f"❌ Erro ao ler arquivos CSV: {e}")
+        return None, None
+```
+
+---
+
+## 🔁 Commit da reorganização
+
+```bash
+git add .
+git commit -m "Criação da pasta agente_inteligente e reorganização dos módulos"
+git push origin main
+```
