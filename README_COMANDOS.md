@@ -181,7 +181,7 @@ if __name__ == "__main__":
 Execução para testes:
 
 ```bash
-python agente_csv.py
+python agente_inteligente\agente_csv.py
 ```
 
 ---
