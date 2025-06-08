@@ -37,16 +37,19 @@ for coluna in df_cabecalho.columns:
 # 6. Aplica filtro por estado (exemplo: Paraíba - "PB")
 
 uf_escolhida = "PB"
-df_filtrado = filtrar_por_estado(df_cabecalho, uf_escolhida)
-
 municipio_escolhido = "JOÃO PESSOA"
-df_filtrado = filtrar_por_municipio(df_filtrado, municipio_escolhido)
 
+# Aqui definimos qual coluna será usada
+coluna_uf = "UF DESTINATÁRIO"
+coluna_municipio = "MUNICÍPIO EMITENTE"
+
+df_filtrado_uf = filtrar_por_estado(df_cabecalho, uf_escolhida, coluna_uf)
+df_filtrado_municipio = filtrar_por_municipio(df_cabecalho, municipio_escolhido, coluna_municipio)
 
 
 # 7. Gera pergunta com base nos dados filtrados
 
-quantidade = len(df_filtrado)
+quantidade = len(df_filtrado_uf)
 mensagem_usuario = (
     f"Foram encontradas {quantidade} notas fiscais emitidas no município de {municipio_escolhido} ({uf_escolhida}). "
     "Qual a importância de analisar essas emissões por localidade?"
