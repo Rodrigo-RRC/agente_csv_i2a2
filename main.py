@@ -40,10 +40,15 @@ uf_escolhida = "PB"
 municipio_escolhido = "JOÃO PESSOA"
 
 # Aqui definimos qual coluna será usada
-coluna_uf = "UF DESTINATÁRIO"
+coluna_uf = "UF EMITENTE"
 coluna_municipio = "MUNICÍPIO EMITENTE"
 
 df_filtrado_uf = filtrar_por_estado(df_cabecalho, uf_escolhida, coluna_uf)
+
+# Teste: visualizar os municípios disponíveis no estado da Paraíba
+print("\n🧪 Municípios encontrados para o estado da PB:")
+print(df_filtrado_uf['MUNICÍPIO EMITENTE'].unique())
+
 df_filtrado_municipio = filtrar_por_municipio(df_cabecalho, municipio_escolhido, coluna_municipio)
 
 
