@@ -11,7 +11,7 @@ import os
 # 2. Importações dos módulos internos do projeto
 
 from agente_inteligente.ler_csv import ler_csvs_notas
-from agente_inteligente.filtros import filtrar_por_estado
+from agente_inteligente.filtros import filtrar_por_estado, filtrar_por_municipio
 
 
 # 3. Carrega a chave da OpenAI do arquivo .env
@@ -29,6 +29,9 @@ df_cabecalho, df_itens = ler_csvs_notas()
 
 print("\n📄 Amostra do cabeçalho original:")
 print(df_cabecalho.head())
+print("\n📌 Atributos disponíveis no DataFrame:")
+for coluna in df_cabecalho.columns:
+    print(" └─", coluna)
 
 
 # 6. Aplica filtro por estado (exemplo: Paraíba - "PB")
@@ -36,13 +39,17 @@ print(df_cabecalho.head())
 uf_escolhida = "PB"
 df_filtrado = filtrar_por_estado(df_cabecalho, uf_escolhida)
 
+municipio_escolhido = "JOÃO PESSOA"
+df_filtrado = filtrar_por_municipio(df_filtrado, municipio_escolhido)
+
+
 
 # 7. Gera pergunta com base nos dados filtrados
 
 quantidade = len(df_filtrado)
 mensagem_usuario = (
-    f"Foram encontradas {quantidade} notas fiscais emitidas no estado da {uf_escolhida}. "
-    "Qual a importância de analisar essas emissões por estado?"
+    f"Foram encontradas {quantidade} notas fiscais emitidas no município de {municipio_escolhido} ({uf_escolhida}). "
+    "Qual a importância de analisar essas emissões por localidade?"
 )
 
 
@@ -56,8 +63,11 @@ llm = ChatOpenAI(
 
 
 # 9. Envia a pergunta e recebe a resposta
+# 🔧 Prompt mínimo para testes controlados (evita uso aleatório de tokens)
 
+mensagem_usuario = "Responda exatamente com a palavra: Teste"
 resposta = llm.invoke([HumanMessage(content=mensagem_usuario)])
+
 
 
 # 10. Exibe a resposta do agente
