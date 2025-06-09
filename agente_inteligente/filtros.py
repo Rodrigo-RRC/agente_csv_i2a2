@@ -1,81 +1,50 @@
-# filtros.py
-
-#🧾 Função 1: Filtrar por estado (UF)
-
-# Importamos o pandas pois todas as operações de filtragem
-# que faremos são com DataFrames, que é a estrutura do pandas.
-
 import pandas as pd
+import unicodedata
 
-
-# Esta função recebe um DataFrame (df) e uma UF (ex: "PB").
-# Ela retorna apenas as linhas do DataFrame em que a coluna "UF" é igual à UF informada.
-
-
-def filtrar_por_estado(df: pd.DataFrame, uf: str) -> pd.DataFrame:
-
-"""
-    Filtra o DataFrame por unidade federativa (estado).
+def filtrar_por_estado(df: pd.DataFrame, uf: str, coluna: str = "UF") -> pd.DataFrame:
+    """
+    Filtra o DataFrame com base no estado (UF) informado.
 
     Parâmetros:
-        df: DataFrame de entrada (ex: df_cabecalho)
-        uf: Sigla do estado (ex: "PB", "SP", "RJ")
+        df (pd.DataFrame): O DataFrame original com os dados.
+        uf (str): A sigla do estado que será usada no filtro, como 'PB' ou 'SP'.
+        coluna (str): O nome exato da coluna onde está a UF, como 'UF EMITENTE'.
 
     Retorna:
-        DataFrame contendo apenas as linhas da UF informada.
+        pd.DataFrame: Um novo DataFrame contendo apenas as linhas filtradas.
     """
-
-# Padroniza a UF para maiúsculas, caso o usuário informe em minúsculas
-    uf = uf.upper()
-
-# Verifica se a coluna "UF" existe no DataFrame
-    if "UF" not in df.columns:
-        print("❌ Coluna 'UF' não encontrada no DataFrame.")
+    if coluna not in df.columns:
+        print(f"❌ Coluna '{coluna}' não encontrada no DataFrame.")
         return df
 
-# Filtra o DataFrame onde a coluna "UF" é igual à uf fornecida
-    df_filtrado = df[df["UF"] == uf]
-
-
-# Mostra o número de registros encontrados
+    df_filtrado = df[df[coluna].astype(str).str.strip().str.upper() == uf.strip().upper()]
     print(f"🔎 {len(df_filtrado)} registros encontrados para o estado: {uf}")
     return df_filtrado
 
 
-#🏙️ Função 2: Filtrar por município
-
-# Esta função é parecida com a anterior, mas agora o filtro é pela coluna "MUNICIPIO".
-
-def filtrar_por_municipio(df: pd.DataFrame, municipio: str) -> pd.DataFrame:
+def normalizar_texto(texto: str) -> str:
     """
-    Filtra o DataFrame por nome de município (cidade).
-
-    Parâmetros:
-        df: DataFrame de entrada (ex: df_cabecalho)
-        municipio: Nome da cidade a ser buscada (ex: "João Pessoa")
-
-    Retorna:
-        DataFrame contendo apenas as linhas da cidade informada.
+    Remove acentos, converte para maiúsculo e tira espaços extras.
     """
-    # Padroniza o nome para caixa alta, se necessário
-    municipio = municipio.strip().upper()
+    if not isinstance(texto, str):
+        return ""
+    texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('utf-8')
+    return texto.strip().upper()
 
-    # Verifica se a coluna "MUNICIPIO" existe no DataFrame
-    if "MUNICIPIO" not in df.columns:
-        print("❌ Coluna 'MUNICIPIO' não encontrada no DataFrame.")
+
+def filtrar_por_municipio(df: pd.DataFrame, municipio: str, coluna: str = "MUNICÍPIO EMITENTE") -> pd.DataFrame:
+    """
+    Filtra o DataFrame por município, aceitando variações (acentos, maiúsculas etc.).
+    Busca aproximada (contém o texto normalizado).
+    """
+    if coluna not in df.columns:
+        print(f"❌ Coluna '{coluna}' não encontrada no DataFrame.")
         return df
 
-    # Filtra pelas cidades cujo nome, em maiúsculas, bate com o informado
-    df_filtrado = df[df["MUNICIPIO"].str.upper() == municipio]
+    df[coluna + "_NORMALIZADO"] = df[coluna].apply(normalizar_texto)
+    municipio_normalizado = normalizar_texto(municipio)
 
-    # Mostra o número de registros encontrados
-    print(f"🏙️ {len(df_filtrado)} registros encontrados para o município: {municipio.title()}")
+    df_filtrado = df[df[coluna + "_NORMALIZADO"].str.contains(municipio_normalizado)]
+
+    print(f"🔎 {len(df_filtrado)} registros encontrados para o município: {municipio.upper()}")
     return df_filtrado
-
-# ✅ Finalização do módulo
-# Fim do módulo filtros.py
-
-# Outras funções poderão ser adicionadas aqui no futuro:
-# - Filtrar por data
-# - Filtrar por CNPJ
-# - Agregações por produto ou NCM
